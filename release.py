@@ -29,8 +29,8 @@ def get_next_version():
 
     # Sostituisci nel file
     new_content = re.sub(
-        r'__version__\s*=\s*[\'"]\d+\.\d+\.\d+[\'"]',
-        f'__version__ = "{new_version}"',
+        r'CURRENT_VERSION\s*=\s*[\'"]\d+\.\d+\.\d+[\'"]',
+        f'CURRENT_VERSION = "{new_version}"',
         content
     )
     with open(VERSION_FILE, "w", encoding="utf-8") as f:
