@@ -1,0 +1,8 @@
+wmi
+wxPython
+pillow
+pynput
+netifaces
+pycaw
+requests
+pyinstaller
