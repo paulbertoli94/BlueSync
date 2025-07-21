@@ -48,11 +48,21 @@ def build_exe():
 
 
 def git_commit_and_tag(version):
-    subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", f"Release v{version}"], check=True)
-    subprocess.run(["git", "tag", f"{TAG_PREFIX}{version}"], check=True)
-    subprocess.run(["git", "push"], check=True)
-    subprocess.run(["git", "push", "origin", f"{TAG_PREFIX}{version}"], check=True)
+    try:
+        # Controlla se ci sono file modificati
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        if result.stdout.strip() == "":
+            print("✅ Niente da committare, procedo solo col tag.")
+        else:
+            subprocess.run(["git", "add", "."], check=True)
+            subprocess.run(["git", "commit", "-m", f"Release v{version}"], check=True)
+
+        subprocess.run(["git", "tag", f"v{version}"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        subprocess.run(["git", "push", "--tags"], check=True)
+    except subprocess.CalledProcessError as e:
+        print("❌ Errore durante commit/tag:", e)
+        raise
 
 
 def upload_release(version):
