@@ -4,7 +4,7 @@ import sys
 import tempfile
 import subprocess
 
-GITHUB_REPO = "tuo-utente/BlueSync"  # <-- Cambia con il tuo
+GITHUB_REPO = "paulbertoli94/BlueSync"  # <-- Cambia con il tuo
 ASSET_NAME = "BlueSync.exe"
 CURRENT_VERSION = "1.0.0"
 
