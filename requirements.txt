@@ -6,3 +6,4 @@ netifaces
 pycaw
 requests
 pyinstaller
+python-dotenv

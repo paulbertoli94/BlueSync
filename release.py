@@ -2,6 +2,10 @@ import os
 import re
 import subprocess
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import requests
 
 REPO = "paulbertoli94/BlueSync"  # ← Cambia con il tuo repo
