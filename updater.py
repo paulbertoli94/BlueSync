@@ -4,7 +4,7 @@ import sys
 import tempfile
 import subprocess
 
-GITHUB_REPO = "paulbertoli94/BlueSync"  # <-- Cambia con il tuo
+GITHUB_REPO = "paulbertoli94/BlueSync"
 ASSET_NAME = "BlueSync.exe"
 CURRENT_VERSION = "1.0.0"
 
@@ -18,30 +18,39 @@ def get_latest_release():
 def check_for_update():
     release = get_latest_release()
     if not release:
-        print("⚠️ Nessuna release trovata.")
+        print("[!] Nessuna release trovata.")
         return
 
     latest_version = release["tag_name"].lstrip("v")
     if latest_version == CURRENT_VERSION:
-        print("✅ Nessun aggiornamento disponibile.")
+        print("[=] Nessun aggiornamento disponibile.")
         return
 
-    print(f"⬇️ Nuova versione disponibile: {latest_version}")
+    print(f"[+] Nuova versione disponibile: {latest_version}")
     for asset in release["assets"]:
         if asset["name"] == ASSET_NAME:
             download_url = asset["browser_download_url"]
-            temp_path = os.path.join(tempfile.gettempdir(), ASSET_NAME)
+            temp_dir = tempfile.gettempdir()
+            temp_new = os.path.join(temp_dir, "BlueSync_new.exe")
+            updater_script = os.path.join(temp_dir, "updater.bat")
 
-            print(f"📦 Scaricamento da {download_url}...")
+            print(f"[>] Scaricamento da {download_url}...")
             with requests.get(download_url, stream=True) as r:
                 r.raise_for_status()
-                with open(temp_path, "wb") as f:
+                with open(temp_new, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
 
-            print(f"✅ Scaricato: {temp_path}")
+            print(f"[✓] Scaricato in {temp_new}")
 
-            # Lancia il nuovo eseguibile e chiude l'app corrente
-            subprocess.Popen([temp_path])
+            current_path = sys.executable
+            with open(updater_script, "w", encoding="utf-8") as bat:
+                bat.write(f"""@echo off
+timeout /t 2 >nul
+taskkill /f /im "{os.path.basename(current_path)}"
+move /y "{temp_new}" "{current_path}"
+start "" "{current_path}"
+""")
+
+            subprocess.Popen(['cmd', '/c', 'start', '', updater_script])
             sys.exit()
-
