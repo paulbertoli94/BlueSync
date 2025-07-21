@@ -6,7 +6,7 @@ import subprocess
 
 GITHUB_REPO = "paulbertoli94/BlueSync"
 ASSET_NAME = "BlueSync.exe"
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "1.0.2"
 
 def get_latest_release():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
