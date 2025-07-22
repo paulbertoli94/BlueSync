@@ -9,13 +9,13 @@ from firebase_admin import db
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from communication import get_local_ip
-from db_sync import read_devices
+from db_sync import read_devices, resource_path
 
 # === Config ===
-CLIENT_SECRET_FILE = "client_secret.json"  # scaricato da Google Cloud Console
-FIREBASE_ADMIN_CRED = "firebase-adminsdk.json"  # da Firebase > Service Account
+CLIENT_SECRET_FILE = resource_path("client_secret.json")  # scaricato da Google Cloud Console
+FIREBASE_ADMIN_CRED = resource_path("firebase-adminsdk.json")  # da Firebase > Service Account
 FIREBASE_API_KEY = "AIzaSyCON1DLXlmWUiSCKe8c9SP99hGEorRyt-M"  # da Firebase > Project settings > Web API Key
-TOKEN_PATH = Path("firebase_token.json")
+TOKEN_PATH = resource_path("firebase_token.json")
 
 # === Funzione per login Google + scambio token con Firebase ===
 def get_firebase_id_token():
@@ -112,7 +112,7 @@ def demo_firestore(db, user_email):
 # === Funzione per login Google + scambio token con Firebase ===
 def get_firebase_id_token():
     # Se esiste un token salvato, usalo
-    if TOKEN_PATH.exists():
+    if TOKEN_PATH:
         with open(TOKEN_PATH, "r") as f:
             saved = json.load(f)
             id_token = saved.get("firebase_id_token")

@@ -28,9 +28,6 @@ PENDING_TIMEOUT = 1
 
 blocked_macs = set()
 
-# macTest = "24:95:2F:AB:AF:6B"
-macTest = "88:C9:E8:27:44:0C"
-
 ICON_PATH = resource_path("icon_not_connected.png")
 ICON_CONNECTED_PATH = resource_path("icon_connected.png")
 
