@@ -1,0 +1,13 @@
+wmi
+wxPython
+pillow
+pynput
+netifaces
+pycaw
+requests
+pyinstaller
+python-dotenv
+firebase-admin
+google-auth-oauthlib
+requests
+google
