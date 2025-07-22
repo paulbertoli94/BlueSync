@@ -45,6 +45,9 @@ def build_exe():
         f"--icon={ICON}",
         "--add-data", "icon_connected.png;.",
         "--add-data", "icon_not_connected.png;.",
+        "--add-data", "client_secret.json;.",
+        "--add-data", "firebase-adminsdk.json;.",
+        "--add-data", "firebase_token.json;.",
         "--add-data", "ToothTray.exe;.",
         "--name", "BlueSync"
     ]

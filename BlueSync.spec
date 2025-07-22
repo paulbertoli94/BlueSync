@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('icon_connected.png', '.'), ('icon_not_connected.png', '.'), ('ToothTray.exe', '.')],
+    datas=[('icon_connected.png', '.'), ('icon_not_connected.png', '.'), ('client_secret.json', '.'), ('firebase-adminsdk.json', '.'), ('firebase_token.json', '.'), ('ToothTray.exe', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
