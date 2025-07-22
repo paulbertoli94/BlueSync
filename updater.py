@@ -10,7 +10,7 @@ load_dotenv()
 
 GITHUB_REPO = "paulbertoli94/BlueSync"
 ASSET_NAME = "BlueSync.exe"
-CURRENT_VERSION = "1.0.8"
+CURRENT_VERSION = "1.0.9"
 TOKEN = os.getenv("GITHUB_TOKEN")
 
 
