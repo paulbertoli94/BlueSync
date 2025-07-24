@@ -17,14 +17,11 @@ from user_activity import UserActivityMonitor
 # Elenco delle app note per chiamate vocali/video
 CALL_APPS = {'ms-teams.exe', 'zoom.exe', 'discord.exe', 'skype.exe', 'whatsapp.exe'}
 
-session_active = False
-session_start_time = 0
 last_trigger_time = 0
 cooldown_seconds = 5
-session_duration = 10
 
 pending_requests = {}
-PENDING_TIMEOUT = 1
+PENDING_TIMEOUT = 2
 
 blocked_macs = set()
 
@@ -122,23 +119,23 @@ def handle_message(sender_ip, message: MessageBuilder):
 
 
 def send_message_with_response_check(message_builder: MessageBuilder, target_ip="255.255.255.255"):
-    if message_builder.get_request_id():
+    if "bt_request" == message_builder.get_type():
         pending_requests[message_builder.get_request_id()] = time.time()
 
-        udp_listener.send_udp(target_ip=target_ip, message_builder=message_builder)
+    udp_listener.send_udp(target_ip=target_ip, message_builder=message_builder)
 
-        if "bt_request" == message_builder.get_type():
-            print(f"⚠️ {PENDING_TIMEOUT}s di attesa per la risposta di {message_builder.get_request_id()}.")
+    if "bt_request" == message_builder.get_type():
+        print(f"⚠️ {PENDING_TIMEOUT}s di attesa per la risposta di {message_builder.get_request_id()}.")
 
-            def check_response_later():
-                time.sleep(PENDING_TIMEOUT)
-                if message_builder.get_request_id() in pending_requests:
-                    print(
-                        f"⏳ Nessuna risposta per {message_builder.get_request_id()}, provo a connettere il dispositivo.")
-                    connect_device(message_builder.get_bt_mac())
-                    pending_requests.pop(message_builder.get_request_id(), None)
+        def check_response_later():
+            time.sleep(PENDING_TIMEOUT)
+            if message_builder.get_request_id() in pending_requests:
+                print(
+                    f"⏳ Nessuna risposta per {message_builder.get_request_id()}, provo a connettere il dispositivo.")
+                connect_device(message_builder.get_bt_mac())
+                pending_requests.pop(message_builder.get_request_id(), None)
 
-            threading.Thread(target=check_response_later, daemon=True).start()
+        threading.Thread(target=check_response_later, daemon=True).start()
 
 
 def get_bluetooth_playback_state(mac):
@@ -200,33 +197,27 @@ class MyApp(wx.App):
 
 
 def user_is_active(devices_to_sync):
-    global last_trigger_time, session_active, session_start_time
+    global last_trigger_time
     now = time.time()
 
-    if not session_active or (now - session_start_time > session_duration):
-        session_active = True
-        session_start_time = now
-        print("🟢 Nuova sessione utente attiva.")
+    if now - last_trigger_time < cooldown_seconds:
+        return
 
-    time_since_session_start = now - session_start_time
-    time_since_last_trigger = now - last_trigger_time
+    last_trigger_time = now
 
-    # Solo nel primo minuto della sessione
-    if time_since_session_start <= 30 and time_since_last_trigger >= cooldown_seconds:
-        last_trigger_time = now
-        local_devices  = read_devices()
-        # Filtra solo quelli da sincronizzare
-        devices_to_check = [
-            dev for dev in local_devices
-            if any(sync_dev['mac'] == dev['mac'] and sync_dev.get('sync_required') for sync_dev in devices_to_sync)
-        ]
-        if not any_device_connected_with_icon_update(devices_to_check):
-            print("💡 Utente attivo, cuffie non connesse. Invio richiesta.")
-            for device in devices_to_check:
-                message = MessageBuilder().set_bt_request(device['mac'])
-                send_message_with_response_check(message_builder=message)
-        else:
-            print("✅ Almeno un dispositivo è già connesso.")
+    local_devices = read_devices()
+    devices_to_check = [
+        dev for dev in local_devices
+        if any(sync_dev['mac'] == dev['mac'] and sync_dev.get('sync_required') for sync_dev in devices_to_sync)
+    ]
+
+    if not any_device_connected_with_icon_update(devices_to_check):
+        print("💡 Utente attivo, cuffie non connesse. Invio richiesta.")
+        for device in devices_to_check:
+            message = MessageBuilder().set_bt_request(device['mac'])
+            send_message_with_response_check(message_builder=message)
+    else:
+        print("✅ Almeno un dispositivo è già connesso.")
 
 
 # schifo, rifare con api in diretta
@@ -255,15 +246,6 @@ def devices_connection_watcher():
         time.sleep(1)
 
 
-def session_timeout_watcher():
-    global session_active, session_start_time
-    while True:
-        if session_active and (time.time() - session_start_time > 300):  # 5 minuti
-            print("🔴 Sessione terminata per inattività.")
-            session_active = False
-        time.sleep(10)
-
-
 def resource_path(relative_path):
     """ Restituisce il path assoluto anche da exe """
     if hasattr(sys, '_MEIPASS'):
@@ -286,7 +268,6 @@ if __name__ == "__main__":
     udp_listener.start()
     tcp_server.start()
 
-    threading.Thread(target=session_timeout_watcher, daemon=True).start()
     threading.Thread(target=devices_connection_watcher, daemon=True).start()
 
     app = MyApp(False)

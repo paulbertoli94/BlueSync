@@ -27,7 +27,7 @@ def get_firebase_id_token():
             refresh_token = saved.get("refresh_token")
 
             try:
-                auth.verify_id_token(id_token)
+                auth.verify_id_token(id_token, clock_skew_seconds=20)
                 print("✅ Accesso già effettuato.")
                 return id_token
             except:
@@ -120,7 +120,7 @@ def get_firebase_id_token():
 
             # Prova a verificare l'idToken
             try:
-                auth.verify_id_token(id_token)
+                auth.verify_id_token(id_token, clock_skew_seconds=20)
                 print("✅ Accesso già effettuato.")
                 return id_token
             except:
@@ -172,7 +172,7 @@ def init_realtime_db(token):
         firebase_admin.initialize_app(cred, {
             'databaseURL': 'https://bluesync-6bdee-default-rtdb.europe-west1.firebasedatabase.app'
         })
-    decoded = auth.verify_id_token(token)
+    decoded = auth.verify_id_token(token, clock_skew_seconds=20)
     user_uid = decoded["uid"]
     email = decoded["email"]
     print("👤 Utente:", email)
